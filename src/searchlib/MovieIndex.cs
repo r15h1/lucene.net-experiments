@@ -38,8 +38,7 @@ namespace SearchLib
             return Analyzer.NewAnonymous((field, reader) =>
             {
                 var tokenizer = new StandardTokenizer(MATCH_LUCENE_VERSION, reader);
-                TokenStream tokenStream = new StandardFilter(MATCH_LUCENE_VERSION, tokenizer);
-                tokenStream = new ASCIIFoldingFilter(tokenStream);
+                TokenStream tokenStream = new ASCIIFoldingFilter(tokenizer);
                 tokenStream = new LowerCaseFilter(MATCH_LUCENE_VERSION, tokenStream);
                 tokenStream = new StopFilter(MATCH_LUCENE_VERSION, tokenStream, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
                 return new TokenStreamComponents(tokenizer, tokenStream);
