@@ -9,18 +9,12 @@ namespace SearchLib
     /// </summary>
     public class Movie
     {
-        public Movie()
-        {
-            Actors = new List<Actor>();
-            Categories = new List<Category>();
-        }
-
         public int MovieId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string Rating { get; set; }
-        public List<Actor> Actors { get; set; }
-        public List<Category> Categories { get; set; }
+        public List<Actor> Actors { get; set; } = new List<Actor>();
+        public List<Category> Categories { get; set; } =new List<Category>();
     }
 
     public class Actor

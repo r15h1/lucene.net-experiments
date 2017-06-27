@@ -49,7 +49,7 @@ namespace SearchLib
         {
             return new MultiFieldQueryParser(
                 MATCH_LUCENE_VERSION,
-                new[] { "title", "article", "description" },
+                new[] { "title", "description" },
                 analyzer
             );
         }
@@ -129,18 +129,7 @@ namespace SearchLib
             return searchResults;
         }
 
-        private Query BuildQuery(string queryString) =>  queryParser.Parse(Sanitize(queryString));
-        
-        private string Sanitize(string qs)
-        {
-            string[] removed = { "*", "?", "%", "+" };
-            string[] spaces = { "-" };
-
-            foreach (var r in removed) qs = qs.Replace(r, string.Empty);
-            foreach (var s in spaces) qs = qs.Replace(s, " ");
-
-            return qs;
-        }
+        private Query BuildQuery(string queryString) =>  queryParser.Parse(queryString);
 
         public void Dispose()
         {
