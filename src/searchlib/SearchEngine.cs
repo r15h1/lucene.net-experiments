@@ -12,7 +12,7 @@
             index = new MovieIndex(Settings.IndexLocation);
         }
 
-        public void BuildIndex() => index.Build(Repository.GetMoviesFromFile());
+        public void BuildIndex() => index.BuildIndex(Repository.GetMoviesFromFile());
 
         public SearchResults Search(string query) => index.Search(query);        
     }

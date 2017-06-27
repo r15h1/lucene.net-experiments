@@ -55,12 +55,15 @@ namespace SearchLib
             );
         }
 
-        public void Build(IEnumerable<Movie> movies)
+        public void BuildIndex(IEnumerable<Movie> movies)
         {
             if (movies == null) throw new ArgumentNullException();
 
-            foreach (var movie in movies)
-                writer.UpdateDocument(new Term("id", movie.MovieId.ToString()), BuildDocument(movie));
+            foreach (var movie in movies)            
+            {
+                Document movieDocument = BuildDocument(movie);
+                writer.UpdateDocument(new Term("id", movie.MovieId.ToString()), movieDocument);
+            }                
 
             writer.Flush(true, true);
             writer.Commit();
@@ -127,11 +130,8 @@ namespace SearchLib
             return searchResults;
         }
 
-        private Query BuildQuery(string queryString)
-        {
-            return queryParser.Parse(Sanitize(queryString));
-        }
-
+        private Query BuildQuery(string queryString) =>  queryParser.Parse(Sanitize(queryString));
+        
         private string Sanitize(string qs)
         {
             string[] removed = { "*", "?", "%", "+" };
