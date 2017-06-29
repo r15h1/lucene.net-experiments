@@ -33,18 +33,8 @@ namespace SearchLib
             searchManager = new SearcherManager(writer, true, null);
         }
 
-        private Analyzer SetupAnalyzer()
-        {
-            return Analyzer.NewAnonymous((field, reader) =>
-            {
-                var tokenizer = new StandardTokenizer(MATCH_LUCENE_VERSION, reader);
-                TokenStream tokenStream = new ASCIIFoldingFilter(tokenizer);
-                tokenStream = new LowerCaseFilter(MATCH_LUCENE_VERSION, tokenStream);
-                tokenStream = new StopFilter(MATCH_LUCENE_VERSION, tokenStream, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
-                return new TokenStreamComponents(tokenizer, tokenStream);
-            });
-        }
-
+        private Analyzer SetupAnalyzer() => new StandardAnalyzer(MATCH_LUCENE_VERSION, StandardAnalyzer.STOP_WORDS_SET);
+ 
         private QueryParser SetupQueryParser(Analyzer analyzer)
         {
             return new MultiFieldQueryParser(
