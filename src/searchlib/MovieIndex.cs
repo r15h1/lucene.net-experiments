@@ -10,6 +10,7 @@ using Lucene.Net.Store;
 using Lucene.Net.Util;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace SearchLib
 {
@@ -119,7 +120,29 @@ namespace SearchLib
             return searchResults;
         }
 
-        private Query BuildQuery(string queryString) =>  queryParser.Parse(queryString);
+        private Query BuildQuery(string queryString) {                        
+            BooleanQuery finalQuery = new BooleanQuery();
+            var parsedQuery = queryParser.Parse(Sanitize(queryString));
+            ISet<Term> terms = new HashSet<Term>(); 
+            parsedQuery.ExtractTerms(terms);
+
+            foreach(var term in terms)
+            {
+                WildcardQuery w = new WildcardQuery(new Term(term.Field, $"{term.Text()}*"));
+                finalQuery.Add(w, Occur.SHOULD);
+            }
+
+            return finalQuery;
+        }
+
+        private string Sanitize(string query) {
+            string toBeReplaced = @"[\+-&|!(){}[]^~*?:/]";            
+            string sanitized = query.ToLowerInvariant();
+            for(int i = 0; i < toBeReplaced.Length; i++)
+                sanitized = sanitized.Replace(toBeReplaced.Substring(i,1), string.Empty);
+
+            return sanitized;
+        }
 
         public void Dispose()
         {
