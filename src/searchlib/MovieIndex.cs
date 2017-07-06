@@ -41,7 +41,8 @@ namespace SearchLib
             return new MultiFieldQueryParser(
                 MATCH_LUCENE_VERSION,
                 new[] { "title", "description" },
-                analyzer
+                analyzer,
+                new Dictionary<string, float>{{"title", 3f}, {"description", 0.001f}}
             );
         }
 
@@ -124,12 +125,16 @@ namespace SearchLib
             BooleanQuery finalQuery = new BooleanQuery();
             var parsedQuery = queryParser.Parse(Sanitize(queryString));
             ISet<Term> terms = new HashSet<Term>(); 
-            parsedQuery.ExtractTerms(terms);
+            parsedQuery.ExtractTerms(terms);            
 
             foreach(var term in terms)
             {
-                WildcardQuery w = new WildcardQuery(new Term(term.Field, $"{term.Text()}*"));
-                finalQuery.Add(w, Occur.SHOULD);
+                PrefixQuery pq = new PrefixQuery(term);
+                TermQuery tq = new TermQuery(term);
+                pq.Boost = term.Field.Equals("title") ? 3.0f : 0.001f;
+                tq.Boost = term.Field.Equals("title") ? 3.0f : 0.001f;
+                finalQuery.Add(pq, Occur.SHOULD);
+                finalQuery.Add(tq, Occur.SHOULD);
             }
 
             return finalQuery;
