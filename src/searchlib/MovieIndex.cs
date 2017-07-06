@@ -11,6 +11,7 @@ using Lucene.Net.Util;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Lucene.Net.Search.Spans;
 
 namespace SearchLib
 {
@@ -100,6 +101,20 @@ namespace SearchLib
             }
         }
 
+        private Query BuildQuery(string queryString) {                        
+            PrefixQuery pq = new PrefixQuery(new Term("title", queryString));
+            return pq;
+        }
+
+        private string Sanitize(string query) {
+            string toBeReplaced = @"[\+-&|!(){}[]^~*?:/]";            
+            string sanitized = query.ToLowerInvariant();
+            for(int i = 0; i < toBeReplaced.Length; i++)
+                sanitized = sanitized.Replace(toBeReplaced.Substring(i,1), string.Empty);
+
+            return sanitized;
+        }
+
         private SearchResults CompileResults(IndexSearcher searcher, TopDocs topdDocs)
         {
             SearchResults searchResults = new SearchResults() { TotalHits = topdDocs.TotalHits };
@@ -119,35 +134,7 @@ namespace SearchLib
             }
 
             return searchResults;
-        }
-
-        private Query BuildQuery(string queryString) {                        
-            BooleanQuery finalQuery = new BooleanQuery();
-            var parsedQuery = queryParser.Parse(Sanitize(queryString));
-            ISet<Term> terms = new HashSet<Term>(); 
-            parsedQuery.ExtractTerms(terms);            
-
-            foreach(var term in terms)
-            {
-                PrefixQuery pq = new PrefixQuery(term);
-                TermQuery tq = new TermQuery(term);
-                pq.Boost = term.Field.Equals("title") ? 3.0f : 0.001f;
-                tq.Boost = term.Field.Equals("title") ? 3.0f : 0.001f;
-                finalQuery.Add(pq, Occur.SHOULD);
-                finalQuery.Add(tq, Occur.SHOULD);
-            }
-
-            return finalQuery;
-        }
-
-        private string Sanitize(string query) {
-            string toBeReplaced = @"[\+-&|!(){}[]^~*?:/]";            
-            string sanitized = query.ToLowerInvariant();
-            for(int i = 0; i < toBeReplaced.Length; i++)
-                sanitized = sanitized.Replace(toBeReplaced.Substring(i,1), string.Empty);
-
-            return sanitized;
-        }
+        }        
 
         public void Dispose()
         {
