@@ -106,9 +106,9 @@ namespace SearchLib
             return pq;
         }
 
-        private string Sanitize(string query) {
+        private string Sanitize(string queryString) {
             string toBeReplaced = @"[\+-&|!(){}[]^~*?:/]";            
-            string sanitized = query.ToLowerInvariant();
+            string sanitized = queryString.ToLowerInvariant();
             for(int i = 0; i < toBeReplaced.Length; i++)
                 sanitized = sanitized.Replace(toBeReplaced.Substring(i,1), string.Empty);
 
