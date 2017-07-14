@@ -18,7 +18,7 @@ namespace SearchLib
     /// <summary>
     /// movies indexed in lucene.net
     /// </summary>
-    internal class MovieIndex : IDisposable
+    public class MovieIndex : IDisposable
     {
         private const LuceneVersion MATCH_LUCENE_VERSION= LuceneVersion.LUCENE_48;
         private const int SNIPPET_LENGTH = 100;
@@ -29,31 +29,16 @@ namespace SearchLib
         public MovieIndex(string indexPath)
         {            
             analyzer = SetupAnalyzer();
-            writer = new IndexWriter(FSDirectory.Open(indexPath), new IndexWriterConfig(MATCH_LUCENE_VERSION, analyzer));
+            writer = new IndexWriter(FSDirectory.Open(indexPath), new IndexWriterConfig(MATCH_LUCENE_VERSION, analyzer){ OpenMode = OpenMode.CREATE });
             searchManager = new SearcherManager(writer, true, null);
         }
 
         private Analyzer SetupAnalyzer() => new StandardAnalyzer(MATCH_LUCENE_VERSION, StandardAnalyzer.STOP_WORDS_SET);
  
-        private QueryParser SetupQueryParser(Analyzer analyzer)
-        {
-            return new MultiFieldQueryParser(
-                MATCH_LUCENE_VERSION,
-                new[] { "title", "description" },
-                analyzer,
-                new Dictionary<string, float>{{"title", 3f}, {"description", 0.001f}}
-            );
-        }
-
         public void BuildIndex(IEnumerable<Movie> movies)
         {
-            if (movies == null) throw new ArgumentNullException();
-
-            foreach (var movie in movies)            
-            {
-                Document movieDocument = BuildDocument(movie);
-                writer.UpdateDocument(new Term("id", movie.MovieId.ToString()), movieDocument);
-            }                
+            foreach (var movie in movies)
+                writer.UpdateDocument(new Term("id", movie.MovieId.ToString()), BuildDocument(movie));
 
             writer.Flush(true, true);
             writer.Commit();
@@ -61,16 +46,10 @@ namespace SearchLib
 
         private Document BuildDocument(Movie movie)
         {
-            Document doc = new Document
+            return new Document
             {
-                new StoredField("movieid", movie.MovieId),
-                new TextField("title", movie.Title, Field.Store.YES),
-                new TextField("description", movie.Description, Field.Store.NO),
-                new StoredField("snippet", MakeSnippet(movie.Description)),
-                new StringField("rating", movie.Rating, Field.Store.YES)
+                new TextField("title", movie.Title, Field.Store.YES)        
             };
-
-            return doc;
         }
 
         private string MakeSnippet(string description)
@@ -105,9 +84,7 @@ namespace SearchLib
             {
                 Document document = searcher.Doc(result.Doc);
                 Hit searchResult = new Hit
-                {
-                    Rating = document.GetField("rating")?.GetStringValue(),
-                    MovieId = document.GetField("movieid")?.GetStringValue(),
+                {                    
                     Score = result.Score,
                     Title = document.GetField("title")?.GetStringValue(),
                     Snippet = document.GetField("snippet")?.GetStringValue()
