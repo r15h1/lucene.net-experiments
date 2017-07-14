@@ -1,11 +1,14 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
+using System;
 
 namespace SearchLib
 {
     public class Repository
     {
-        public static IEnumerable<Movie> GetMoviesFromFile() => JsonConvert.DeserializeObject<List<Movie>>(File.ReadAllText(Settings.MovieJsonFile));
+        public static IEnumerable<Movie> GetMoviesFromFile() {
+            throw new NotImplementedException();
+        }
     }
 }

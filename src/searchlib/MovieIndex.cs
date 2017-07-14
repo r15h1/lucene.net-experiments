@@ -24,13 +24,11 @@ namespace SearchLib
         private const int SNIPPET_LENGTH = 100;
         private readonly IndexWriter writer;
         private readonly Analyzer analyzer;
-        private readonly QueryParser queryParser;
         private readonly SearcherManager searchManager;
 
         public MovieIndex(string indexPath)
         {            
             analyzer = SetupAnalyzer();
-            queryParser = SetupQueryParser(analyzer);
             writer = new IndexWriter(FSDirectory.Open(indexPath), new IndexWriterConfig(MATCH_LUCENE_VERSION, analyzer));
             searchManager = new SearcherManager(writer, true, null);
         }
@@ -82,10 +80,9 @@ namespace SearchLib
                     : $"{description.Substring(0, SNIPPET_LENGTH)}...";
         }
 
-        public SearchResults Search(string queryString)
+        public SearchResults Search(Query query)
         {
-            int resultsPerPage = 10;
-            Query query = BuildQuery(queryString);
+            int resultsPerPage = 10;            
             searchManager.MaybeRefreshBlocking();
             IndexSearcher searcher = searchManager.Acquire();
 
@@ -100,21 +97,7 @@ namespace SearchLib
                 searcher = null;
             }
         }
-
-        private Query BuildQuery(string queryString) {                        
-            PrefixQuery pq = new PrefixQuery(new Term("title", queryString));
-            return pq;
-        }
-
-        private string Sanitize(string queryString) {
-            string toBeReplaced = @"[\+-&|!(){}[]^~*?:/]";            
-            string sanitized = queryString.ToLowerInvariant();
-            for(int i = 0; i < toBeReplaced.Length; i++)
-                sanitized = sanitized.Replace(toBeReplaced.Substring(i,1), string.Empty);
-
-            return sanitized;
-        }
-
+        
         private SearchResults CompileResults(IndexSearcher searcher, TopDocs topdDocs)
         {
             SearchResults searchResults = new SearchResults() { TotalHits = topdDocs.TotalHits };
