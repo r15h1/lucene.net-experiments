@@ -7,7 +7,7 @@ namespace SearchLib
         private MovieIndex movieIndex;
 
         public MovieFixture() { 
-            PrepareTestData();
+            PrepareTestIndex();
         }
 
         public MovieIndex MovieIndex{
@@ -16,7 +16,7 @@ namespace SearchLib
             }
         }
 
-        private void PrepareTestData(){
+        private void PrepareTestIndex(){
             var movies = new Movie[]{
                 new Movie{ MovieId = 1, Title = "Living Water" },
                 new Movie{ MovieId = 2, Title = "Ring of Bright Water" },

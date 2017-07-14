@@ -86,8 +86,7 @@ namespace SearchLib
                 Hit searchResult = new Hit
                 {                    
                     Score = result.Score,
-                    Title = document.GetField("title")?.GetStringValue(),
-                    Snippet = document.GetField("snippet")?.GetStringValue()
+                    Title = document.GetField("title")?.GetStringValue()
                 };
 
                 searchResults.Hits.Add(searchResult);

@@ -18,6 +18,7 @@ namespace SearchLib
         {            
             Query q = new PrefixQuery(new Term("title", "home"));
             var results = movieIndex.Search(q);
+            Assert.Equal(results.Hits.Count, 2);
         }
     }
 }
