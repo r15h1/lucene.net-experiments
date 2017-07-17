@@ -12,6 +12,9 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Lucene.Net.Search.Spans;
+using System.IO;
+using Lucene.Net.Analysis.TokenAttributes;
+using Lucene.Net.Analysis.En;
 
 namespace SearchLib
 {
@@ -33,7 +36,8 @@ namespace SearchLib
             searchManager = new SearcherManager(writer, true, null);
         }
 
-        private Analyzer SetupAnalyzer() => new StandardAnalyzer(MATCH_LUCENE_VERSION, StandardAnalyzer.STOP_WORDS_SET);
+        //private Analyzer SetupAnalyzer() => new StandardAnalyzer(MATCH_LUCENE_VERSION, StandardAnalyzer.STOP_WORDS_SET);
+        private Analyzer SetupAnalyzer() => new EnglishAnalyzer(MATCH_LUCENE_VERSION, StandardAnalyzer.STOP_WORDS_SET);
  
         public void BuildIndex(IEnumerable<Movie> movies)
         {
@@ -77,6 +81,20 @@ namespace SearchLib
             }
         }
         
+        public IEnumerable<string> Tokenize(string text)
+        {
+            var tokens = new List<string>();
+            using(var reader = new StringReader(text))
+            using(TokenStream stream = analyzer.GetTokenStream(null, reader))
+            {
+                stream.Reset();
+                while(stream.IncrementToken())                
+                    tokens.Add(stream.GetAttribute<ICharTermAttribute>().ToString());
+            }
+
+            return tokens;
+        }
+
         private SearchResults CompileResults(IndexSearcher searcher, TopDocs topdDocs)
         {
             SearchResults searchResults = new SearchResults() { TotalHits = topdDocs.TotalHits };
