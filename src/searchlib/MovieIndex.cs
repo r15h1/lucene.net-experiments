@@ -15,6 +15,7 @@ using Lucene.Net.Search.Spans;
 using System.IO;
 using Lucene.Net.Analysis.TokenAttributes;
 using Lucene.Net.Analysis.En;
+using Lucene.Net.Analysis.Fr;
 
 namespace SearchLib
 {
@@ -26,18 +27,21 @@ namespace SearchLib
         private const LuceneVersion MATCH_LUCENE_VERSION= LuceneVersion.LUCENE_48;
         private const int SNIPPET_LENGTH = 100;
         private readonly IndexWriter writer;
-        private readonly Analyzer analyzer;
+        private readonly Analyzer stdAnalyzer, engAnalyzer, frAnalyzer;
         private readonly SearcherManager searchManager;
 
         public MovieIndex(string indexPath)
         {            
-            analyzer = SetupAnalyzer();
-            writer = new IndexWriter(FSDirectory.Open(indexPath), new IndexWriterConfig(MATCH_LUCENE_VERSION, analyzer){ OpenMode = OpenMode.CREATE });
+            stdAnalyzer = new StandardAnalyzer(MATCH_LUCENE_VERSION, StandardAnalyzer.STOP_WORDS_SET);
+            engAnalyzer = new EnglishAnalyzer(MATCH_LUCENE_VERSION, EnglishAnalyzer.DefaultStopSet);
+            frAnalyzer = new FrenchAnalyzer(MATCH_LUCENE_VERSION, FrenchAnalyzer.DefaultStopSet);
+
+            writer = new IndexWriter(FSDirectory.Open(indexPath), new IndexWriterConfig(MATCH_LUCENE_VERSION, stdAnalyzer){ OpenMode = OpenMode.CREATE_OR_APPEND });
             searchManager = new SearcherManager(writer, true, null);
         }
 
-        //private Analyzer SetupAnalyzer() => new StandardAnalyzer(MATCH_LUCENE_VERSION, StandardAnalyzer.STOP_WORDS_SET);
-        private Analyzer SetupAnalyzer() => new EnglishAnalyzer(MATCH_LUCENE_VERSION, StandardAnalyzer.STOP_WORDS_SET);
+        private Analyzer SetupAnalyzer() => new StandardAnalyzer(MATCH_LUCENE_VERSION, StandardAnalyzer.STOP_WORDS_SET);
+        //private Analyzer SetupAnalyzer() => new EnglishAnalyzer(MATCH_LUCENE_VERSION, StandardAnalyzer.STOP_WORDS_SET);
  
         public void BuildIndex(IEnumerable<Movie> movies)
         {
@@ -79,13 +83,13 @@ namespace SearchLib
                 searchManager.Release(searcher);
                 searcher = null;
             }
-        }
-        
-        public IEnumerable<string> Tokenize(string text)
+        }        
+
+        public IList<string> Tokenize(string text)
         {
             var tokens = new List<string>();
             using(var reader = new StringReader(text))
-            using(TokenStream stream = analyzer.GetTokenStream(null, reader))
+            using(TokenStream stream = stdAnalyzer.GetTokenStream(null, reader))
             {
                 stream.Reset();
                 while(stream.IncrementToken())                
@@ -116,7 +120,9 @@ namespace SearchLib
         public void Dispose()
         {
             searchManager?.Dispose();
-            analyzer?.Dispose();
+            stdAnalyzer?.Dispose();
+            engAnalyzer?.Dispose();
+            frAnalyzer?.Dispose();
             writer?.Dispose();
         }
     }
