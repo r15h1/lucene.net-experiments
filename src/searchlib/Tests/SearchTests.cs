@@ -6,7 +6,7 @@ using Lucene.Net.Index;
 using Lucene.Net.Search;
 using Xunit;
 
-namespace SearchLib
+namespace SearchLib.Test
 {
     public class SearchTest:IClassFixture<MovieFixture>
     {

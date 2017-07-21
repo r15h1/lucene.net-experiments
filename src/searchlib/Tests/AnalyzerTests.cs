@@ -13,7 +13,7 @@ using Lucene.Net.Util;
 using Xunit;
 
 
-namespace SearchLib
+namespace SearchLib.Tests
 {
     public class AnalyzerTests
     {
@@ -25,10 +25,12 @@ namespace SearchLib
             var stdAnalyzer = new StandardAnalyzer(MATCH_LUCENE_VERSION, StandardAnalyzer.STOP_WORDS_SET);
             var engAnalyzer = new EnglishAnalyzer(MATCH_LUCENE_VERSION, EnglishAnalyzer.DefaultStopSet);
             var frAnalyzer = new FrenchAnalyzer(MATCH_LUCENE_VERSION, FrenchAnalyzer.DefaultStopSet);
+            var enhAnalyzer= new EnhancedEnglishAnalyzer(MATCH_LUCENE_VERSION, EnglishAnalyzer.DefaultStopSet);
 
             var stdList = Tokenize("My friends are visiting Montréal's engineering institutions", stdAnalyzer);        
             var engList = Tokenize("My friends are visiting Montréal's engineering institutions", engAnalyzer);
             var frList = Tokenize("Mes amis visitent les instituts d'ingénierie de Montréal", frAnalyzer);
+            var enhList = Tokenize("My friends are visiting Montréal's engineering institutions", enhAnalyzer);
         }        
 
         private IEnumerable<string> Tokenize(string text, Analyzer analyzer)
