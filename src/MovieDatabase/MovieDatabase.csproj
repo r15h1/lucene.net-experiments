@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lucene.Net" Version="4.8.0-beta00005" />
+    <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00005" />
+    <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00005" />
+  </ItemGroup>
+
+   <ItemGroup>
+    <None Update="movies.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    </ItemGroup>
+
+</Project>

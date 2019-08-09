@@ -1,4 +1,4 @@
-﻿using Lucene.Net.Analysis;
+using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Core;
 using Lucene.Net.Analysis.Miscellaneous;
 using Lucene.Net.Analysis.Standard;
@@ -11,15 +11,11 @@ using Lucene.Net.Util;
 using System;
 using System.Collections.Generic;
 
-namespace SearchLib
+namespace MovieDatabase
 {
-    /// <summary>
-    /// movies indexed in lucene.net
-    /// </summary>
-    internal class MovieIndex : IDisposable
+    public class MovieIndex : IDisposable
     {
         private const LuceneVersion MATCH_LUCENE_VERSION= LuceneVersion.LUCENE_48;
-        private const int SNIPPET_LENGTH = 100;
         private readonly IndexWriter writer;
         private readonly Analyzer analyzer;
         private readonly QueryParser queryParser;
@@ -33,26 +29,16 @@ namespace SearchLib
             searchManager = new SearcherManager(writer, true, null);
         }
 
-        private Analyzer SetupAnalyzer() => new StandardAnalyzer(MATCH_LUCENE_VERSION, StandardAnalyzer.STOP_WORDS_SET);
- 
-        private QueryParser SetupQueryParser(Analyzer analyzer)
-        {
-            return new MultiFieldQueryParser(
-                MATCH_LUCENE_VERSION,
-                new[] { "title", "description" },
-                analyzer
-            );
-        }
+        private Analyzer SetupAnalyzer() => new StandardAnalyzer(MATCH_LUCENE_VERSION);
 
-        public void BuildIndex(IEnumerable<Movie> movies)
+        private QueryParser SetupQueryParser(Analyzer analyzer) => new QueryParser(MATCH_LUCENE_VERSION, "title", analyzer);
+
+        public void Build(IEnumerable<Movie> movies)
         {
             if (movies == null) throw new ArgumentNullException();
 
-            foreach (var movie in movies)            
-            {
-                Document movieDocument = BuildDocument(movie);
-                writer.UpdateDocument(new Term("id", movie.MovieId.ToString()), movieDocument);
-            }                
+            foreach (var movie in movies)
+                writer.AddDocument(BuildDocument(movie));
 
             writer.Flush(true, true);
             writer.Commit();
@@ -61,34 +47,27 @@ namespace SearchLib
         private Document BuildDocument(Movie movie)
         {
             Document doc = new Document
-            {
-                new StoredField("movieid", movie.MovieId),
+            {                
                 new TextField("title", movie.Title, Field.Store.YES),
-                new TextField("description", movie.Description, Field.Store.NO),
-                new StoredField("snippet", MakeSnippet(movie.Description)),
-                new StringField("rating", movie.Rating, Field.Store.YES)
+                new StringField("year", movie.Year.ToString(), Field.Store.YES),
+                new TextField("cast", string.Join(", ", movie.Cast), Field.Store.YES), 
+                new TextField("genres", string.Join(", ", movie.Genres), Field.Store.YES)
             };
 
             return doc;
         }
 
-        private string MakeSnippet(string description)
-        {
-            return (string.IsNullOrWhiteSpace(description) || description.Length <= SNIPPET_LENGTH)
-                    ? description 
-                    : $"{description.Substring(0, SNIPPET_LENGTH)}...";
-        }
-
         public SearchResults Search(string queryString)
         {
-            int resultsPerPage = 10;
-            Query query = BuildQuery(queryString);
+            int resultsPerPage = 100;
+            Query query = queryParser.Parse(queryString);
+            Console.WriteLine($"{query.ToString()}");
             searchManager.MaybeRefreshBlocking();
             IndexSearcher searcher = searchManager.Acquire();
 
             try
             {
-                TopDocs topdDocs = searcher.Search(query, resultsPerPage);
+                TopDocs topdDocs = searcher.Search(query, resultsPerPage);                
                 return CompileResults(searcher, topdDocs);
             }
             finally
@@ -106,11 +85,11 @@ namespace SearchLib
                 Document document = searcher.Doc(result.Doc);
                 Hit searchResult = new Hit
                 {
-                    Rating = document.GetField("rating")?.GetStringValue(),
-                    MovieId = document.GetField("movieid")?.GetStringValue(),
-                    Score = result.Score,
                     Title = document.GetField("title")?.GetStringValue(),
-                    Snippet = document.GetField("snippet")?.GetStringValue()
+                    Year = document.GetField("year")?.GetStringValue(),
+                    Cast = document.GetField("cast")?.GetStringValue(),
+                    Score = result.Score,
+                    Genres = document.GetField("genres")?.GetStringValue()
                 };
 
                 searchResults.Hits.Add(searchResult);
@@ -118,9 +97,6 @@ namespace SearchLib
 
             return searchResults;
         }
-
-        private Query BuildQuery(string queryString) =>  queryParser.Parse(queryString);
-
         public void Dispose()
         {
             searchManager?.Dispose();
