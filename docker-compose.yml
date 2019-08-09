@@ -1,0 +1,16 @@
+#creates a new enviroment for python and django applications using postgresql
+#change image=name:tag, database settings as needed
+version: '3'
+services:
+  netapp:
+    build:
+      context: .
+      dockerfile: Dockerfile-dotnet
+    image: dotnet:lucene-experiments
+    ports: 
+      - 5000:5000
+      - 5001:5001
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
