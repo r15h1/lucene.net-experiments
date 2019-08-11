@@ -61,7 +61,7 @@ namespace MovieDatabase
         {
             int resultsPerPage = 100;
             Query query = queryParser.Parse(queryString);
-            Console.WriteLine($"{query.ToString()}");
+            Console.WriteLine($"query in lucene syntax => {query.ToString()} \n");
             searchManager.MaybeRefreshBlocking();
             IndexSearcher searcher = searchManager.Acquire();
 
