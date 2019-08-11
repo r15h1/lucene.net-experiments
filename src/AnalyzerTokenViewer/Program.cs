@@ -21,6 +21,8 @@ namespace TokenFromAnalyzers
                 new SimpleAnalyzer(MATCH_LUCENE_VERSION),
                 new StopAnalyzer(MATCH_LUCENE_VERSION),
                 new StandardAnalyzer(MATCH_LUCENE_VERSION),
+
+                //this was known as the StandardAnalyzer in version 3
                 new ClassicAnalyzer(MATCH_LUCENE_VERSION)
             };
 
@@ -38,10 +40,12 @@ namespace TokenFromAnalyzers
             ICharTermAttribute termAttribute = tokenStream.AddAttribute<ICharTermAttribute>();
             ITypeAttribute typeAttribute = tokenStream.AddAttribute<ITypeAttribute>();
 
+            Console.WriteLine("\n\n");
             tokenStream.Reset();
             while (tokenStream.IncrementToken()) {
-                Console.WriteLine($"{offsetAttribute.StartOffset}-{offsetAttribute.EndOffset} {termAttribute.ToString()} {typeAttribute.ToString()}"); 
+                Console.WriteLine($"{offsetAttribute.StartOffset}-{offsetAttribute.EndOffset}\t{termAttribute.ToString()}\t{typeAttribute.ToString()}"); 
             }
+            
         }
     }
 }

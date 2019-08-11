@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieDatabase", "MovieDatab
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryConsole", "QueryConsole\QueryConsole.csproj", "{408948A8-1BB2-4619-9832-23F667EC1C2F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TokenFromAnalyzers", "TokenFromAnalyzers\TokenFromAnalyzers.csproj", "{05098551-2DD4-42CB-A2D7-718A90B814B4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnalyzerTokenViewer", "AnalyzerTokenViewer\AnalyzerTokenViewer.csproj", "{05098551-2DD4-42CB-A2D7-718A90B814B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
