@@ -39,13 +39,12 @@ namespace TokenFromAnalyzers
             IOffsetAttribute offsetAttribute = tokenStream.AddAttribute<IOffsetAttribute>();
             ICharTermAttribute termAttribute = tokenStream.AddAttribute<ICharTermAttribute>();
             ITypeAttribute typeAttribute = tokenStream.AddAttribute<ITypeAttribute>();
-
-            Console.WriteLine("\n\n");
+            
             tokenStream.Reset();
             while (tokenStream.IncrementToken()) {
                 Console.WriteLine($"{offsetAttribute.StartOffset}-{offsetAttribute.EndOffset}\t{termAttribute.ToString()}\t{typeAttribute.ToString()}"); 
             }
-            
+            Console.WriteLine("\n");
         }
     }
 }
